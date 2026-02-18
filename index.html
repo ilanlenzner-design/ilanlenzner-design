@@ -1,40 +1,595 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-g" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Image Expander</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ilan Lenzner — AI Creative Specialist & Product Designer</title>
+    <meta name="description" content="I design AI-powered tools that automate creative production. 20+ years at the intersection of AI, design, and engineering.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-      /* For a custom scrollbar to match the dark theme */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #1f2937; /* gray-800 */
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #4b5563; /* gray-600 */
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #6b7280; /* gray-500 */
-      }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0a0a0a;
+            --bg-card: #141414;
+            --text: #e5e5e5;
+            --text-muted: #888;
+            --text-dim: #555;
+            --accent: #7c5cfc;
+            --accent-2: #c084fc;
+            --border: #222;
+            --border-hover: #444;
+            --radius: 12px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        /* Animated floating dot grid — zero gravity drift */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -60px; left: -60px; right: -60px; bottom: -60px;
+            pointer-events: none;
+            background-image: radial-gradient(rgba(124, 92, 252, 0.08) 1.2px, transparent 1.2px);
+            background-size: 50px 50px;
+            background-attachment: fixed;
+            animation: dotDrift 25s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: -40px; left: -40px; right: -40px; bottom: -40px;
+            pointer-events: none;
+            background-image: radial-gradient(rgba(192, 132, 252, 0.05) 1px, transparent 1px);
+            background-size: 80px 80px;
+            background-position: 25px 25px;
+            background-attachment: fixed;
+            animation: dotDrift2 35s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+            z-index: 0;
+        }
+        @keyframes dotDrift {
+            0%   { transform: translateY(0) translateX(0); }
+            25%  { transform: translateY(-18px) translateX(20px); }
+            50%  { transform: translateY(-10px) translateX(35px); }
+            75%  { transform: translateY(12px) translateX(15px); }
+            100% { transform: translateY(0) translateX(0); }
+        }
+        @keyframes dotDrift2 {
+            0%   { transform: translateY(0) translateX(0); }
+            25%  { transform: translateY(12px) translateX(-15px); }
+            50%  { transform: translateY(5px) translateX(-25px); }
+            75%  { transform: translateY(-8px) translateX(-10px); }
+            100% { transform: translateY(0) translateX(0); }
+        }
+
+        /* All content above the dot layers */
+        nav, section, footer { position: relative; z-index: 1; }
+
+        a { color: var(--accent-2); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #e0c4ff; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 16px 0;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s;
+        }
+        nav.scrolled { border-bottom-color: var(--border); }
+        nav .container { display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { font-weight: 700; font-size: 18px; color: var(--text); letter-spacing: -0.5px; }
+        .nav-links { display: flex; gap: 32px; }
+        .nav-links a { color: var(--text-muted); font-size: 14px; font-weight: 500; }
+        .nav-links a:hover { color: var(--text); }
+
+        /* HERO */
+        .hero {
+            min-height: 100vh; display: flex; align-items: center;
+            position: relative; overflow: hidden;
+        }
+        .hero-bg {
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% -20%, rgba(124,92,252,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 50%, rgba(192,132,252,0.06) 0%, transparent 50%);
+        }
+        .hero-content { position: relative; z-index: 1; max-width: 700px; }
+        .hero-label {
+            display: inline-block; font-size: 13px; font-weight: 600;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--accent); margin-bottom: 20px;
+        }
+        .hero h1 {
+            font-size: clamp(40px, 7vw, 64px); font-weight: 700;
+            line-height: 1.1; letter-spacing: -2px; color: #fff; margin-bottom: 20px;
+        }
+        .hero-desc {
+            font-size: 18px; color: var(--text-muted); line-height: 1.7;
+            max-width: 540px; margin-bottom: 36px;
+        }
+        .hero-links { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 24px; border-radius: 8px;
+            font-size: 14px; font-weight: 600; transition: all 0.2s;
+            border: none; cursor: pointer;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+        }
+        .btn-primary:hover {
+            color: #fff; transform: translateY(-1px);
+            box-shadow: 0 8px 30px rgba(124,92,252,0.3);
+        }
+        .btn-outline {
+            background: transparent; color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover {
+            color: var(--text); border-color: var(--border-hover);
+            background: var(--bg-card);
+        }
+
+        /* SECTIONS */
+        section { padding: 100px 0; }
+        .section-label {
+            font-size: 13px; font-weight: 600; letter-spacing: 2px;
+            text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: clamp(28px, 4vw, 40px); font-weight: 700;
+            letter-spacing: -1px; color: #fff; margin-bottom: 48px;
+        }
+
+        /* PROJECTS */
+        .projects-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .project-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden;
+            transition: all 0.3s ease; display: block;
+        }
+        .project-card:hover {
+            border-color: var(--border-hover); transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4); color: var(--text);
+        }
+        .project-image {
+            width: 100%; height: 200px; position: relative; overflow: hidden;
+        }
+        .project-image img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .project-card:hover .project-image img { transform: scale(1.05); }
+
+        .grad-1 { background: linear-gradient(135deg, #1a1040 0%, #2d1b69 40%, #7c5cfc 100%); }
+        .grad-2 { background: linear-gradient(135deg, #0a192f 0%, #112240 40%, #2a6496 100%); }
+        .grad-3 { background: linear-gradient(135deg, #1a0a2e 0%, #3d1f6d 40%, #c084fc 100%); }
+        .grad-4 { background: linear-gradient(135deg, #0f0c29 0%, #302b63 40%, #24243e 100%); }
+        .grad-5 { background: linear-gradient(135deg, #141e30 0%, #243b55 40%, #4a90d9 100%); }
+        .grad-6 { background: linear-gradient(135deg, #1a0000 0%, #3d0f0f 40%, #c05050 100%); }
+
+        .project-body { padding: 24px; }
+        .project-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        .project-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; }
+        .project-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .tag {
+            font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;
+            background: rgba(124,92,252,0.1); color: var(--accent-2);
+            border: 1px solid rgba(124,92,252,0.15);
+        }
+
+        /* ABOUT */
+        .about-content { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+        .about-text { font-size: 16px; color: var(--text-muted); line-height: 1.8; }
+        .about-text p + p { margin-top: 16px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .stat {
+            padding: 24px; background: var(--bg-card);
+            border: 1px solid var(--border); border-radius: var(--radius);
+        }
+        .stat-number { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: -1px; }
+        .stat-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+        /* SKILLS */
+        .skills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .skill-group {
+            padding: 28px; background: var(--bg-card);
+            border: 1px solid var(--border); border-radius: var(--radius);
+        }
+        .skill-group-title {
+            font-size: 14px; font-weight: 700; color: #fff;
+            margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+        }
+        .skill-group-title span {
+            display: inline-block; width: 8px; height: 8px;
+            border-radius: 50%; background: var(--accent);
+        }
+        .skill-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .skill-tag {
+            font-size: 12px; padding: 4px 10px; border-radius: 6px;
+            background: rgba(255,255,255,0.04); color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        /* TIMELINE */
+        .timeline { position: relative; padding-left: 32px; }
+        .timeline::before {
+            content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px;
+            width: 1px; background: var(--border);
+        }
+        .timeline-item { position: relative; padding-bottom: 28px; }
+        .timeline-item:last-child { padding-bottom: 0; }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -29px; top: 8px;
+            width: 9px; height: 9px; border-radius: 50%;
+            background: var(--accent); border: 2px solid var(--bg);
+        }
+        .timeline-item.current::before { box-shadow: 0 0 0 4px rgba(124,92,252,0.2); }
+        .timeline-role { font-size: 15px; font-weight: 600; color: #fff; }
+        .timeline-company { font-size: 14px; color: var(--text-muted); }
+        .timeline-dates { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+        /* CONTACT */
+        .contact-section { text-align: center; padding: 120px 0; }
+        .contact-section .section-title { margin-bottom: 16px; }
+        .contact-desc { font-size: 16px; color: var(--text-muted); margin-bottom: 36px; }
+        .contact-links { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+        /* FOOTER */
+        footer {
+            padding: 40px 0; border-top: 1px solid var(--border); text-align: center;
+        }
+        footer p { font-size: 13px; color: var(--text-dim); }
+
+        /* ANIMATIONS */
+        .reveal {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .stagger > * { transition-delay: calc(var(--i, 0) * 0.08s); }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .projects-grid { grid-template-columns: 1fr; }
+            .about-content { grid-template-columns: 1fr; gap: 40px; }
+            .skills-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+        }
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 36px; letter-spacing: -1px; }
+            .hero-desc { font-size: 16px; }
+            section { padding: 60px 0; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .stat { padding: 16px; }
+            .stat-number { font-size: 24px; }
+        }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0"
-  }
-}
-</script>
 </head>
-  <body class="bg-gray-900 text-white">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+<body>
+
+<nav id="nav">
+    <div class="container">
+        <a href="#" class="nav-logo">IL</a>
+        <div class="nav-links">
+            <a href="#work">Work</a>
+            <a href="#about">About</a>
+            <a href="#experience">Experience</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-label">AI Creative Specialist & Product Designer</div>
+            <h1>I design tools that&nbsp;make AI work&nbsp;for&nbsp;creatives.</h1>
+            <p class="hero-desc">20+ years building at the intersection of design, AI, and engineering. Currently at Sett, where I've built 45+ AI production tools that generate game assets, animate characters, and ship playable ads end-to-end.</p>
+            <div class="hero-links">
+                <a href="https://github.com/ilanlenzner-design" class="btn btn-primary" target="_blank">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    GitHub
+                </a>
+                <a href="https://linkedin.com/in/ilan-lenzner" class="btn btn-outline" target="_blank">LinkedIn</a>
+                <a href="mailto:ilan@ilans.net" class="btn btn-outline">Email Me</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- WORK -->
+<section id="work">
+    <div class="container">
+        <div class="reveal">
+            <div class="section-label">Featured Work</div>
+            <h2 class="section-title">Things I've built.</h2>
+        </div>
+        <div class="projects-grid stagger">
+
+            <a href="https://github.com/ilanlenzner-design/character-animator" target="_blank" class="project-card reveal" style="--i:0">
+                <div class="project-image grad-1"></div>
+                <div class="project-body">
+                    <div class="project-title">AI Character Animator</div>
+                    <p class="project-desc">End-to-end pipeline that animates still images into transparent videos for mobile game ads. Uses Kling and MiniMax AI with automated chromakey and SAM3 segmentation.</p>
+                    <div class="project-tags">
+                        <span class="tag">Python</span>
+                        <span class="tag">Kling AI</span>
+                        <span class="tag">MiniMax</span>
+                        <span class="tag">FFmpeg</span>
+                        <span class="tag">SAM3</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://github.com/ilanlenzner-design/ai-studio" target="_blank" class="project-card reveal" style="--i:1">
+                <div class="project-image grad-2"></div>
+                <div class="project-body">
+                    <div class="project-title">AI Studio</div>
+                    <p class="project-desc">Modular AI platform with unlimited tools — image generation, video processing, 3D modeling, background removal. Built on Replicate API with a clean panel interface.</p>
+                    <div class="project-tags">
+                        <span class="tag">JavaScript</span>
+                        <span class="tag">Replicate</span>
+                        <span class="tag">Node.js</span>
+                        <span class="tag">AI Platform</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://github.com/ilanlenzner-design/particle-generator-tool" target="_blank" class="project-card reveal" style="--i:2">
+                <div class="project-image grad-3"></div>
+                <div class="project-body">
+                    <div class="project-title">Particle Effect Generator</div>
+                    <p class="project-desc">Visual WYSIWYG editor for 2D and 3D particle systems. 20+ preset effects, AI-powered sprite generation, real-time preview. Used in production game ads.</p>
+                    <div class="project-tags">
+                        <span class="tag">TypeScript</span>
+                        <span class="tag">PixiJS</span>
+                        <span class="tag">Three.js</span>
+                        <span class="tag">WebGL</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://github.com/ilanlenzner-design/InkForge" target="_blank" class="project-card reveal" style="--i:3">
+                <div class="project-image grad-4"></div>
+                <div class="project-body">
+                    <div class="project-title">InkForge</div>
+                    <p class="project-desc">Native macOS drawing app with AI-powered editing, layers, selections, texture brushes, and a Procreate-inspired UI. Built for concept art and asset creation.</p>
+                    <div class="project-tags">
+                        <span class="tag">Swift</span>
+                        <span class="tag">macOS</span>
+                        <span class="tag">AI Editing</span>
+                        <span class="tag">CoreGraphics</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://video-slider-editor.vercel.app" target="_blank" class="project-card reveal" style="--i:4">
+                <div class="project-image grad-5"></div>
+                <div class="project-body">
+                    <div class="project-title">Video Slider Editor</div>
+                    <p class="project-desc">Glassmorphic panel-based video editor with draggable panels, zoom &amp; pan, and persistent state. Built with React, TypeScript, and Tailwind CSS.</p>
+                    <div class="project-tags">
+                        <span class="tag">React</span>
+                        <span class="tag">TypeScript</span>
+                        <span class="tag">Tailwind</span>
+                        <span class="tag">Live Demo</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://github.com/ilanlenzner-design/sonic-forge" target="_blank" class="project-card reveal" style="--i:5">
+                <div class="project-image grad-6"></div>
+                <div class="project-body">
+                    <div class="project-title">Sonic Forge</div>
+                    <p class="project-desc">AI music generation for game ads. Text-to-music using Google Lyria-2 and Meta MusicGen via Replicate, with glassmorphism UI and audio variations.</p>
+                    <div class="project-tags">
+                        <span class="tag">JavaScript</span>
+                        <span class="tag">Lyria-2</span>
+                        <span class="tag">MusicGen</span>
+                        <span class="tag">Replicate</span>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+        <p style="text-align:center; margin-top:40px; color:var(--text-dim); font-size:14px;">
+            See all 45+ projects on <a href="https://github.com/ilanlenzner-design?tab=repositories" target="_blank">GitHub</a>
+        </p>
+    </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+    <div class="container">
+        <div class="reveal">
+            <div class="section-label">About</div>
+            <h2 class="section-title">Design meets AI engineering.</h2>
+        </div>
+        <div class="about-content">
+            <div class="about-text reveal">
+                <p>I started in motion graphics and 3D animation, moved into interactive advertising where I directed campaigns for Fortune 500 brands, then into product design for AI tools and healthcare systems.</p>
+                <p>Now I build the AI systems themselves. At Sett, I architect autonomous agents that generate game assets, animate characters, and ship playable ads — designing both the tools and the AI pipelines behind them. I think in design systems and ship in code.</p>
+                <p>Based in Tel Aviv. Open to opportunities where AI and creative production intersect.</p>
+            </div>
+            <div class="stats-grid reveal">
+                <div class="stat"><div class="stat-number">20+</div><div class="stat-label">Years in design & tech</div></div>
+                <div class="stat"><div class="stat-number">45+</div><div class="stat-label">AI tools built</div></div>
+                <div class="stat"><div class="stat-number">15+</div><div class="stat-label">AI agent skills</div></div>
+                <div class="stat"><div class="stat-number">500+</div><div class="stat-label">Ad campaigns shipped</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+    <div class="container">
+        <div class="reveal">
+            <div class="section-label">Skills</div>
+            <h2 class="section-title">What I work with.</h2>
+        </div>
+        <div class="skills-grid">
+            <div class="skill-group reveal">
+                <div class="skill-group-title"><span></span> Design</div>
+                <div class="skill-list">
+                    <span class="skill-tag">Figma</span>
+                    <span class="skill-tag">UX/UI Design</span>
+                    <span class="skill-tag">Design Systems</span>
+                    <span class="skill-tag">User Research</span>
+                    <span class="skill-tag">Prototyping</span>
+                    <span class="skill-tag">Motion Graphics</span>
+                    <span class="skill-tag">3D Modeling</span>
+                    <span class="skill-tag">Blender</span>
+                    <span class="skill-tag">After Effects</span>
+                    <span class="skill-tag">Photoshop</span>
+                    <span class="skill-tag">Illustrator</span>
+                </div>
+            </div>
+            <div class="skill-group reveal">
+                <div class="skill-group-title"><span></span> AI & Creative Tech</div>
+                <div class="skill-list">
+                    <span class="skill-tag">AI Agents</span>
+                    <span class="skill-tag">LLM Integration</span>
+                    <span class="skill-tag">Claude</span>
+                    <span class="skill-tag">GPT-4</span>
+                    <span class="skill-tag">Prompt Engineering</span>
+                    <span class="skill-tag">Replicate</span>
+                    <span class="skill-tag">Midjourney</span>
+                    <span class="skill-tag">Kling</span>
+                    <span class="skill-tag">MiniMax</span>
+                    <span class="skill-tag">ElevenLabs</span>
+                    <span class="skill-tag">SAM3</span>
+                    <span class="skill-tag">MCP Servers</span>
+                </div>
+            </div>
+            <div class="skill-group reveal">
+                <div class="skill-group-title"><span></span> Engineering</div>
+                <div class="skill-list">
+                    <span class="skill-tag">Python</span>
+                    <span class="skill-tag">TypeScript</span>
+                    <span class="skill-tag">JavaScript</span>
+                    <span class="skill-tag">Swift</span>
+                    <span class="skill-tag">React</span>
+                    <span class="skill-tag">Node.js</span>
+                    <span class="skill-tag">PixiJS</span>
+                    <span class="skill-tag">Three.js</span>
+                    <span class="skill-tag">FFmpeg</span>
+                    <span class="skill-tag">AWS</span>
+                    <span class="skill-tag">n8n</span>
+                    <span class="skill-tag">Webpack</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+    <div class="container">
+        <div class="reveal">
+            <div class="section-label">Experience</div>
+            <h2 class="section-title">Where I've worked.</h2>
+        </div>
+        <div class="timeline reveal">
+            <div class="timeline-item current">
+                <div class="timeline-role">AI Creative Lead & Product Designer</div>
+                <div class="timeline-company">Sett</div>
+                <div class="timeline-dates">2024 — Present</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-role">AI & Design Innovation Lead</div>
+                <div class="timeline-company">Rabin Medical Center (Clalit Health Services)</div>
+                <div class="timeline-dates">2024</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-role">Product Designer & AI Workflow Developer</div>
+                <div class="timeline-company">PlayBatch, Tel Aviv</div>
+                <div class="timeline-dates">2022 — 2023</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-role">Product Designer</div>
+                <div class="timeline-company">Bites</div>
+                <div class="timeline-dates">2020 — 2022</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-role">Creative Director</div>
+                <div class="timeline-company">justAd & Market Group</div>
+                <div class="timeline-dates">2013 — 2020</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-role">Rich Media Specialist</div>
+                <div class="timeline-company">eyeblaster (MediaMind / Sizmek)</div>
+                <div class="timeline-dates">2007 — 2013</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-role">3D & Motion Specialist</div>
+                <div class="timeline-company">Gorni Digital, DPSI, ScanMaster</div>
+                <div class="timeline-dates">2000 — 2007</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact-section">
+    <div class="container">
+        <div class="reveal">
+            <div class="section-label">Contact</div>
+            <h2 class="section-title">Let's talk.</h2>
+            <p class="contact-desc">Open to AI creative, product design, and creative technology roles.</p>
+            <div class="contact-links">
+                <a href="mailto:ilan@ilans.net" class="btn btn-primary">ilan@ilans.net</a>
+                <a href="https://linkedin.com/in/ilan-lenzner" class="btn btn-outline" target="_blank">LinkedIn</a>
+                <a href="https://github.com/ilanlenzner-design" class="btn btn-outline" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>Ilan Lenzner — Tel Aviv, Israel</p>
+    </div>
+</footer>
+
+<script>
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
 </html>
