@@ -1,5 +1,0 @@
-{
-  "name": "AI Image Expander v2",
-  "description": "Upload an image, and our AI will generate a prompt to re-imagine it. Choose a new aspect ratio and generate a new, expanded version of your image that creatively fills the new dimensions.",
-  "requestFramePermissions": []
-}
