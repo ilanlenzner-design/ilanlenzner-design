@@ -551,6 +551,7 @@
             { text: 'ILAN LENZNER', scale: 0.9 },
             { video: 'videos/portrait-anim.mp4' },
             { text: 'AI + DESIGN', scale: 0.9 },
+            { video: 'videos/ilans-talk.mp4' },
             { image: 'images/rhino.png' },
             { text: '45+ TOOLS', scale: 0.9 },
             { text: 'CREATIVE TECH', scale: 0.9 },
@@ -717,6 +718,9 @@
                         if (lum > 235) continue;
                         // Chromakey: skip green-dominant pixels
                         if (G > 80 && G > R * 1.3 && G > B * 1.3) continue;
+                        // Grey-bg removal: skip neutral low-saturation bright pixels
+                        var maxC = Math.max(R, G, B), minC = Math.min(R, G, B);
+                        if (maxC - minC < 30 && lum > 140) continue;
                     }
                     litPixels.push({ dc: c - cx, dr: r - cy, r: R, g: G, b: B });
                 }
