@@ -534,6 +534,56 @@
     }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
+    /* ── Parallax: content recedes & fades on scroll ── */
+    (function() {
+        const readyEls = new Map();
+        const heroContent = document.querySelector('.hero-content');
+
+        function tick() {
+            const vh = window.innerHeight;
+            const now = performance.now();
+
+            // Hero parallax — recedes as you scroll down
+            if (heroContent) {
+                const scrollT = Math.min(1, Math.max(0, window.scrollY / (vh * 0.6)));
+                if (scrollT > 0) {
+                    heroContent.style.opacity = String(1 - scrollT);
+                    heroContent.style.transform = 'scale(' + (1 - scrollT * 0.1) + ') translateY(' + (-scrollT * 50) + 'px)';
+                } else {
+                    heroContent.style.opacity = '';
+                    heroContent.style.transform = '';
+                }
+            }
+
+            // Section content parallax — recede & disappear when scrolled past
+            document.querySelectorAll('.reveal.visible').forEach(el => {
+                if (!readyEls.has(el)) {
+                    readyEls.set(el, now);
+                    return;
+                }
+                if (now - readyEls.get(el) < 700) return;
+                el.style.transition = 'none';
+
+                const rect = el.getBoundingClientRect();
+                const center = rect.top + rect.height / 2;
+
+                if (center < vh * 0.35) {
+                    const t = Math.min(1, (vh * 0.35 - center) / (vh * 0.45));
+                    const ease = t * t;
+                    el.style.opacity = String(1 - ease * 0.95);
+                    el.style.transform = 'scale(' + (1 - ease * 0.12) + ') translateY(' + (-ease * 30) + 'px)';
+                } else {
+                    el.style.opacity = '';
+                    el.style.transform = '';
+                }
+            });
+
+            requestAnimationFrame(tick);
+        }
+
+        requestAnimationFrame(tick);
+    })();
+
     /* ── Force-field dot grid with dot-matrix banner ── */
     (function() {
         const canvas = document.getElementById('dotfield');
