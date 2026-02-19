@@ -534,29 +534,88 @@
     }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    /* ── Parallax: content recedes & fades on scroll ── */
+    /* ── Parallax: content recedes, scatters & fades on scroll ── */
     (function() {
         const readyEls = new Map();
         const heroContent = document.querySelector('.hero-content');
+        const SCATTER_AT = 0.3; // scatter begins at 30% of parallax progress
+
+        // Pre-compute random scatter directions for each child
+        function initScatter(el) {
+            if (el._scatter) return;
+            el._scatter = [];
+            var n = el.children.length;
+            for (var i = 0; i < n; i++) {
+                var angle = (Math.PI * 2 / n) * i + (Math.random() - 0.5) * 1.2;
+                var dist = 400 + Math.random() * 600;
+                el._scatter.push({
+                    tx: Math.cos(angle) * dist,
+                    ty: Math.sin(angle) * dist - 150,
+                    rot: (Math.random() - 0.5) * 80
+                });
+            }
+        }
+
+        // Apply parallax + scatter to an element based on progress (0 to 1)
+        function applyEffect(el, progress) {
+            initScatter(el);
+            var children = el.children;
+
+            // Parent: only transform (no opacity — children handle visibility)
+            el.style.overflow = 'visible';
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(' + (-progress * 250) + 'px)';
+
+            if (progress < SCATTER_AT) {
+                // Pre-scatter: children fade slightly together
+                var fade = progress / SCATTER_AT; // 0 to 1
+                for (var i = 0; i < children.length; i++) {
+                    children[i].style.transform = 'scale(' + (1 - fade * 0.15) + ')';
+                    children[i].style.opacity = String(1 - fade * 0.3);
+                    children[i].style.filter = '';
+                }
+            } else {
+                // Scatter: each child flies in its own direction
+                var raw = (progress - SCATTER_AT) / (1 - SCATTER_AT); // 0 to 1
+                var ep = raw * raw;
+                for (var i = 0; i < children.length; i++) {
+                    var d = el._scatter[i % el._scatter.length];
+                    children[i].style.transform = 'translate(' + (d.tx * ep) + 'px,' + (d.ty * ep) + 'px) rotate(' + (d.rot * ep) + 'deg) scale(' + (0.85 - ep * 0.4) + ')';
+                    children[i].style.opacity = String(Math.max(0, 0.7 - ep * 0.9));
+                    children[i].style.filter = 'blur(' + (ep * 8) + 'px)';
+                }
+            }
+        }
+
+        // Reset element and its children
+        function resetEffect(el) {
+            el.style.opacity = '';
+            el.style.transform = '';
+            el.style.overflow = '';
+            var children = el.children;
+            for (var i = 0; i < children.length; i++) {
+                children[i].style.transform = '';
+                children[i].style.opacity = '';
+                children[i].style.filter = '';
+            }
+        }
 
         function tick() {
-            const vh = window.innerHeight;
-            const now = performance.now();
+            var vh = window.innerHeight;
+            var now = performance.now();
 
-            // Hero parallax — recedes as you scroll down
+            // Hero parallax + scatter
             if (heroContent) {
-                const scrollT = Math.min(1, Math.max(0, window.scrollY / (vh * 0.6)));
-                if (scrollT > 0) {
-                    heroContent.style.opacity = String(1 - scrollT);
-                    heroContent.style.transform = 'scale(' + (1 - scrollT * 0.1) + ') translateY(' + (-scrollT * 50) + 'px)';
+                var scrollT = Math.min(1, Math.max(0, window.scrollY / (vh * 0.35)));
+                if (scrollT > 0.01) {
+                    applyEffect(heroContent, scrollT);
                 } else {
-                    heroContent.style.opacity = '';
-                    heroContent.style.transform = '';
+                    resetEffect(heroContent);
                 }
             }
 
-            // Section content parallax — recede & disappear when scrolled past
-            document.querySelectorAll('.reveal.visible').forEach(el => {
+            // Section content parallax + scatter
+            document.querySelectorAll('.reveal.visible').forEach(function(el) {
                 if (!readyEls.has(el)) {
                     readyEls.set(el, now);
                     return;
@@ -564,17 +623,14 @@
                 if (now - readyEls.get(el) < 700) return;
                 el.style.transition = 'none';
 
-                const rect = el.getBoundingClientRect();
-                const center = rect.top + rect.height / 2;
+                var rect = el.getBoundingClientRect();
+                var center = rect.top + rect.height / 2;
 
                 if (center < vh * 0.35) {
-                    const t = Math.min(1, (vh * 0.35 - center) / (vh * 0.45));
-                    const ease = t * t;
-                    el.style.opacity = String(1 - ease * 0.95);
-                    el.style.transform = 'scale(' + (1 - ease * 0.12) + ') translateY(' + (-ease * 30) + 'px)';
+                    var t = Math.min(1, (vh * 0.35 - center) / (vh * 0.4));
+                    applyEffect(el, t * t);
                 } else {
-                    el.style.opacity = '';
-                    el.style.transform = '';
+                    resetEffect(el);
                 }
             });
 
